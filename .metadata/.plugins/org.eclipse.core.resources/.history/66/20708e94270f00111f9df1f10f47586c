@@ -1,0 +1,23 @@
+package com.example.demo.dto;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class FinancialNarrativeResponseDTO {
+	  private BigDecimal totalSpending;
+
+	    private String highestSpendingCategory;
+
+	    private String lowestSpendingCategory;
+
+	    private List<CategoryBreakdownDTO> categoryBreakdown;
+
+	    private String narrative;
+
+}

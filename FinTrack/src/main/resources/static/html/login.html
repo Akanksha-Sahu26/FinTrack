@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FinTrack | Login</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="auth-container fade-in">
+    <h1 class="brand">FinTrack</h1>
+    <form id="loginForm">
+      <div class="form-group">
+        <input type="email" name="email" placeholder="Email" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <input type="password" name="password" placeholder="Password" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn" style="width: 100%;">Login</button>
+    </form>
+    <p class="redirect">Don't have an account? <a href="register.html">Register</a></p>
+    <div id="loginMsg" class="msg"></div>
+  </div>
+  <script src="/js/api.js"></script>
+  <script>
+    const form = document.getElementById('loginForm');
+    const msg = document.getElementById('loginMsg');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.textContent = '';
+      msg.className = 'msg';
+      try {
+        const data = {
+          email: form.email.value.trim(),
+          password: form.password.value
+        };
+        const res = await AuthAPI.login(data);
+        if (res && res.id) {
+          localStorage.setItem('userId', res.id);
+          window.location.href = 'dashboard.html';
+        }
+      } catch (err) {
+        msg.textContent = err.message || 'Login failed';
+        msg.className = 'msg error';
+      }
+    });
+  </script>
+</body>
+</html>

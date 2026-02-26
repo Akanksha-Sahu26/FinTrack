@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Expenses - Expense Tracker</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Manage Expenses</h1>
+        <a href="index.html" class="btn">Dashboard</a>
+    </header>
+
+    <main>
+        <section class="expense-form">
+            <h3>Add Expense</h3>
+            <form id="expenseForm">
+                <input type="text" id="category" placeholder="Category" required>
+                <input type="number" id="amount" placeholder="Amount" required min="0.01" step="0.01">
+                <input type="date" id="expDate" required>
+                <button type="submit">Add Expense</button>
+            </form>
+        </section>
+
+        <section class="expense-table">
+            <h3>All Expenses</h3>
+            <table id="expensesTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        ExpensesPage.init();
+    </script>
+</body>
+</html>

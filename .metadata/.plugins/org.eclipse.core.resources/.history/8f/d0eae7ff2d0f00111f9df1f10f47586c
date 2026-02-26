@@ -1,0 +1,131 @@
+package com.example.demo.service;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.stereotype.Service;
+
+import com.example.demo.dto.CategoryBreakdownDTO;
+import com.example.demo.dto.ExpenseResponseDTO;
+import com.example.demo.dto.FinancialNarrativeResponseDTO;
+import com.example.demo.exception.ResourceNotFoundException;
+
+import tools.jackson.databind.ObjectMapper;
+
+@Service
+public class AIService {
+
+    private final ExpenseService expenseService;
+    private final ChatClient chatClient;
+    private final ObjectMapper objectMapper;
+
+   
+        public AIService(ExpenseService expenseService,ChatClient.Builder builder, ObjectMapper objectMapper) {
+        this.chatClient = builder.build();
+        this.expenseService = expenseService;
+        this.objectMapper = objectMapper;
+    }
+
+        public FinancialNarrativeResponseDTO generateFinancialNarrative(
+                Long userId, int month, int year) {
+
+            // 1️⃣ Fetch expenses for given month & year
+            List<ExpenseResponseDTO> expenses =
+                    expenseService.getExpensesByMonth(userId, month, year);
+
+            if (expenses == null || expenses.isEmpty()) {
+                throw new ResourceNotFoundException(
+                        "No expenses found for user " + userId +
+                                " for month " + month + " and year " + year
+                );
+            }
+
+            // 2️⃣ Calculate total spending (month specific)
+            BigDecimal totalSpending = expenses.stream()
+                    .map(ExpenseResponseDTO::getAmt)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            // 3️⃣ Group by category
+            Map<String, BigDecimal> categoryTotals =
+                    expenses.stream()
+                            .collect(Collectors.groupingBy(
+                                    exp -> exp.getCategory().getName(),
+                                    Collectors.reducing(
+                                            BigDecimal.ZERO,
+                                            ExpenseResponseDTO::getAmt,
+                                            BigDecimal::add
+                                    )
+                            ));
+
+            // 4️⃣ Determine highest & lowest spending categories
+            Map.Entry<String, BigDecimal> highest =
+                    categoryTotals.entrySet()
+                            .stream()
+                            .max(Map.Entry.comparingByValue())
+                            .orElseThrow();
+
+            Map.Entry<String, BigDecimal> lowest =
+                    categoryTotals.entrySet()
+                            .stream()
+                            .min(Map.Entry.comparingByValue())
+                            .orElseThrow();
+
+            // 5️⃣ Convert category map into breakdown DTO list
+            List<CategoryBreakdownDTO> breakdownList =
+                    categoryTotals.entrySet()
+                            .stream()
+                            .map(entry -> new CategoryBreakdownDTO(
+                                    entry.getKey(),
+                                    entry.getValue()
+                            ))
+                            .toList();
+
+            try {
+
+                // 6️⃣ Prepare AI prompt (Narrative only)
+                String userPrompt = """
+                        Total Spending: %s
+                        Category Breakdown: %s
+                        Highest Spending Category: %s
+                        Lowest Spending Category: %s
+
+                        Generate a concise 3-4 line financial analysis summary.
+                        Focus on spending patterns and insights.
+                        Return plain text only.
+                        """
+                        .formatted(
+                                totalSpending,
+                                categoryTotals,
+                                highest.getKey(),
+                                lowest.getKey()
+                        );
+
+                // 7️⃣ Call AI to generate narrative only
+                String narrative = chatClient.prompt()
+                        .system("You are a financial assistant providing spending insights.")
+                        .user(userPrompt)
+                        .call()
+                        .content();
+
+                // 8️⃣ Construct final response manually (deterministic structure)
+                FinancialNarrativeResponseDTO response =
+                        new FinancialNarrativeResponseDTO();
+
+                response.setTotalSpending(totalSpending);
+                response.setHighestSpendingCategory(highest.getKey());
+                response.setLowestSpendingCategory(lowest.getKey());
+                response.setCategoryBreakdown(breakdownList);
+                response.setNarrative(narrative);
+
+                return response;
+
+            } catch (Exception e) {
+                throw new RuntimeException(
+                        "Failed to generate financial narrative from AI", e
+                );
+            }
+        }
+}

@@ -1,0 +1,127 @@
+package com.example.demo.service;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.stereotype.Service;
+
+import com.example.demo.dto.ExpenseResponseDTO;
+import com.example.demo.dto.FinancialNarrativeResponseDTO;
+import com.example.demo.exception.ResourceNotFoundException;
+
+import tools.jackson.databind.ObjectMapper;
+
+@Service
+public class AIService {
+
+    private final ExpenseService expenseService;
+    private final ChatClient chatClient;
+    private final ObjectMapper objectMapper;
+
+    public AIService(ExpenseService expenseService,
+                     ChatClient chatClient,
+                     ObjectMapper objectMapper) {
+        this.expenseService = expenseService;
+        this.chatClient = chatClient;
+        this.objectMapper = objectMapper;
+    }
+
+    public FinancialNarrativeResponseDTO generateFinancialNarrative(
+            Long userId,int month,int year) {
+
+        // 1️⃣ Fetch monthly expenses
+        List<ExpenseResponseDTO> expenses =
+                expenseService.getExpensesByMonth(userId, month, year);
+
+        if (expenses.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    "No expenses found for user " + userId);
+        }
+
+        // 2️⃣ Calculate total monthly spending (must be month specific)
+        BigDecimal totalSpending =
+                expenseService.getMonthlySummary(userId);
+
+        // 3️⃣ Group expenses by category using Streams
+        Map<String, BigDecimal> categoryTotals =
+                expenses.stream()
+                        .collect(Collectors.groupingBy(
+                                exp -> exp.getCategory().getName(),
+                                Collectors.reducing(
+                                        BigDecimal.ZERO,
+                                        ExpenseResponseDTO::getAmt,
+                                        BigDecimal::add
+                                )
+                        ));
+
+        // 4️⃣ Find highest & lowest category
+        Map.Entry<String, BigDecimal> highest =
+                categoryTotals.entrySet()
+                        .stream()
+                        .max(Map.Entry.comparingByValue())
+                        .orElseThrow();
+
+        Map.Entry<String, BigDecimal> lowest =
+                categoryTotals.entrySet()
+                        .stream()
+                        .min(Map.Entry.comparingByValue())
+                        .orElseThrow();
+
+        try {
+            // 5️⃣ Convert category map to proper JSON
+            String categoryJson =
+                    objectMapper.writeValueAsString(categoryTotals);
+
+            // 6️⃣ Build AI prompt
+            String userPrompt = """
+                    Total Spending: %s
+                    Category Breakdown (JSON): %s
+                    Highest Spending Category: %s
+                    Lowest Spending Category: %s
+
+                    Generate a concise financial summary in strict JSON format:
+
+                    {
+                      "totalSpending": "...",
+                      "highestCategory": "...",
+                      "lowestCategory": "...",
+                      "narrative": "..."
+                    }
+
+                    Do not include explanations outside JSON.
+                    """
+                    .formatted(
+                            totalSpending,
+                            categoryJson,
+                            highest.getKey(),
+                            lowest.getKey()
+                    );
+
+            // 7️⃣ Call AI using ChatClient
+            String aiResponse = chatClient.prompt()
+                    .system("""
+                            You are a financial analysis assistant.
+                            Always return strictly valid JSON.
+                            Do not add markdown, explanation, or extra text.
+                            """)
+                    .user(userPrompt)
+                    .call()
+                    .content();
+
+            // 8️⃣ Parse AI response into DTO
+            return objectMapper.readValue(
+                    aiResponse,
+                    FinancialNarrativeResponseDTO.class
+            );
+
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Failed to generate financial narrative from AI",e
+            );
+        }
+    }
+}

@@ -1,0 +1,240 @@
+package com.example.demo.service;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.stereotype.Service;
+
+import com.example.demo.dto.CategoryBreakdownDTO;
+import com.example.demo.dto.ExpenseResponseDTO;
+import com.example.demo.dto.FinancialNarrativeResponseDTO;
+import com.example.demo.dto.RiskDetectionResponseDTO;
+import com.example.demo.exception.ResourceNotFoundException;
+
+import tools.jackson.databind.ObjectMapper;
+
+@Service
+public class AIService {
+
+    private final ExpenseService expenseService;
+    private final ChatClient chatClient;
+    private final ObjectMapper objectMapper;
+
+   
+        public AIService(ExpenseService expenseService,ChatClient.Builder builder, ObjectMapper objectMapper) {
+        this.chatClient = builder.build();
+        this.expenseService = expenseService;
+        this.objectMapper = objectMapper;
+    }
+
+        public FinancialNarrativeResponseDTO generateFinancialNarrative(
+                Long userId, int month, int year) {
+
+            // 1️⃣ Fetch expenses for given month & year
+            List<ExpenseResponseDTO> expenses =
+                    expenseService.getExpensesByMonth(userId, month, year);
+
+            if (expenses == null || expenses.isEmpty()) {
+                throw new ResourceNotFoundException(
+                        "No expenses found for user " + userId +
+                                " for month " + month + " and year " + year
+                );
+            }
+
+            // 2️⃣ Calculate total spending (month specific)
+            BigDecimal totalSpending = expenses.stream()
+                    .map(ExpenseResponseDTO::getAmt)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            // 3️⃣ Group by category
+            Map<String, BigDecimal> categoryTotals =
+                    expenses.stream()
+                            .collect(Collectors.groupingBy(
+                                    exp -> exp.getCategory().getName(),
+                                    Collectors.reducing(
+                                            BigDecimal.ZERO,
+                                            ExpenseResponseDTO::getAmt,
+                                            BigDecimal::add
+                                    )
+                            ));
+
+            // 4️⃣ Determine highest & lowest spending categories
+            Map.Entry<String, BigDecimal> highest =
+                    categoryTotals.entrySet()
+                            .stream()
+                            .max(Map.Entry.comparingByValue())
+                            .orElseThrow();
+
+            Map.Entry<String, BigDecimal> lowest =
+                    categoryTotals.entrySet()
+                            .stream()
+                            .min(Map.Entry.comparingByValue())
+                            .orElseThrow();
+
+            // 5️⃣ Convert category map into breakdown DTO list
+            List<CategoryBreakdownDTO> breakdownList =
+                    categoryTotals.entrySet()
+                            .stream()
+                            .map(entry -> new CategoryBreakdownDTO(
+                                    entry.getKey(),
+                                    entry.getValue()
+                            ))
+                            .toList();
+
+            try {
+
+                // 6️⃣ Prepare AI prompt (Narrative only)
+            	String userPrompt = """
+                        All monetary values are in Indian Rupees (INR).
+                        Use ₹ symbol if mentioning currency.
+                        Do NOT use dollar ($) symbol.
+
+                        Total Spending (INR): ₹%s
+                        Category Breakdown (INR): %s
+                        Highest Spending Category: %s (₹%s)
+                        Lowest Spending Category: %s (₹%s)
+
+                        Generate a concise 3-4 line financial analysis summary.
+                        Base insights strictly on numeric values provided.
+                        Do not add introductory phrases.
+                        Return plain text only.
+                        """
+                        .formatted(
+                                totalSpending,
+                                categoryTotals,
+                                highest.getKey(),
+                                highest.getValue(),
+                                lowest.getKey(),
+                                lowest.getValue()
+                        );
+
+                // 7️⃣ Call AI to generate narrative only
+                String narrative = chatClient.prompt()
+                        .system("You are a financial assistant providing spending insights.")
+                        .user(userPrompt)
+                        .call()
+                        .content();
+
+                // 8️⃣ Construct final response manually (deterministic structure)
+                FinancialNarrativeResponseDTO response =
+                        new FinancialNarrativeResponseDTO();
+
+                response.setTotalSpending(totalSpending);
+                response.setHighestSpendingCategory(highest.getKey());
+                response.setLowestSpendingCategory(lowest.getKey());
+                response.setCategoryBreakdown(breakdownList);
+                response.setNarrative(narrative);
+
+                return response;
+
+            } catch (Exception e) {
+                throw new RuntimeException(
+                        "Failed to generate financial narrative from AI", e
+                );
+            }
+        }
+        
+        
+        public RiskDetectionResponseDTO categoryWiseRiskDetection(
+                Long userId, int year, int month) {
+
+            // 1️⃣ Fetch monthly expenses
+            List<ExpenseResponseDTO> expenses =
+                    expenseService.getExpensesByMonth(userId, month, year);
+
+            if (expenses == null || expenses.isEmpty()) {
+                throw new ResourceNotFoundException(
+                        "No expenses found for user " + userId +
+                                " for month " + month + " and year " + year);
+            }
+
+            // 2️⃣ Get total spending using ready-made method
+            BigDecimal totalSpending =
+                    expenseService.getMonthlySummary(userId);
+
+            if (totalSpending == null ||
+                    totalSpending.compareTo(BigDecimal.ZERO) == 0) {
+                throw new IllegalStateException(
+                        "Monthly total spending is zero or invalid.");
+            }
+
+            // 3️⃣ Aggregate category totals
+            Map<String, BigDecimal> categoryTotals = new HashMap<>();
+
+            for (ExpenseResponseDTO expense : expenses) {
+
+                if (expense.getCategory() == null) continue;
+
+                String category =expense.getCategory().getName().toUpperCase();
+
+                categoryTotals.merge(
+                        category,
+                        expense.getAmt(),
+                        BigDecimal::add
+                );
+            }
+
+            List<String> riskyCategories = new ArrayList<>();
+            List<String> safeCategories = new ArrayList<>();
+
+            // 4️⃣ Risk classification logic (deterministic)
+            for (Map.Entry<String, BigDecimal> entry : categoryTotals.entrySet()) {
+
+                BigDecimal percentage = entry.getValue()
+                        .divide(totalSpending, 4, RoundingMode.HALF_UP)
+                        .multiply(BigDecimal.valueOf(100));
+
+                // HIGH risk if > 40%
+                if (percentage.compareTo(BigDecimal.valueOf(40)) > 0) {
+                    riskyCategories.add(entry.getKey());
+                } else {
+                    safeCategories.add(entry.getKey());
+                }
+            }
+
+            // 5️⃣ AI Consolidated Narrative
+            String prompt = """
+                    All values are in Indian Rupees (₹).
+
+                    Total Monthly Spending: ₹%s
+                    Category Distribution: %s
+                    Risky Categories (>40%% spending): %s
+                    Safe Categories: %s
+
+                    Provide a concise financial risk analysis summary.
+                    Mention why certain categories are risky.
+                    Provide balanced financial advice.
+                    Do not exaggerate.
+                    Do not use dollar symbol.
+                    Return plain text only.
+                    """
+                    .formatted(
+                            totalSpending,
+                            categoryTotals,
+                            riskyCategories,
+                            safeCategories
+                    );
+
+            String narrative = chatClient.prompt()
+                    .system("You are a financial risk analysis assistant specializing in Indian spending patterns.")
+                    .user(prompt)
+                    .call()
+                    .content();
+
+            // 6️⃣ Build Response
+            RiskDetectionResponseDTO response =
+                    new RiskDetectionResponseDTO();
+
+            response.setRiskyCategories(riskyCategories);
+            response.setSafeCategories(safeCategories);
+            response.setRiskAnalysisNarrative(narrative);
+
+            return response;
+        }
+}

@@ -1,0 +1,18 @@
+package com.example.demo.dto;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class BudgetPlannerResponseDTO {
+	 private BigDecimal requiredMonthlySavings;
+
+	    private List<RecommendedAllocationDTO> recommendedCategoryAllocations;
+
+	    private String planningNarrative;
+}

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FinTrack | Expenses</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <h1 class="brand">FinTrack</h1>
+        <nav>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="budget.html">Budget Planner</a>
+            <a href="expenses.html">Expenses</a>
+            <a href="health.html">Health Score</a>
+            <button id="logoutBtn" class="btn logout-btn">Logout</button>
+        </nav>
+    </header>
+
+    <main class="fade-in">
+        <section class="expense-section">
+            <h2>Manage Your Expenses</h2>
+            <form id="expenseForm">
+                <input type="text" placeholder="Category" name="categoryName" required>
+                <input type="number" placeholder="Amount" name="amt" required>
+                <input type="date" name="expDate" required>
+                <button type="submit" class="btn">Add Expense</button>
+            </form>
+            <table id="expenseTable">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Expenses loaded here -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/expenses.js"></script>
+</body>
+</html>

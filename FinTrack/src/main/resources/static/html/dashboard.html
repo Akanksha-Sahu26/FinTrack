@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FinTrack | Dashboard</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <a href="dashboard.html" class="brand">FinTrack</a>
+    <nav>
+      <a href="dashboard.html" class="active">Dashboard</a>
+      <a href="expenses.html">Expenses</a>
+      <a href="budget.html">Budget</a>
+      <a href="health.html">Health</a>
+      <a href="risk.html">Risk</a>
+      <a href="categories.html">Categories</a>
+      <a href="profile.html">Profile</a>
+      <button id="logoutBtn" class="btn logout-btn">Logout</button>
+    </nav>
+  </header>
+
+  <main class="fade-in">
+    <section class="cards-container">
+      <div class="card fade-in-delay-1">
+        <h3>Total Spending</h3>
+        <p id="totalSpending">₹0</p>
+      </div>
+      <div class="card fade-in-delay-2">
+        <h3>Remaining</h3>
+        <p id="remainingSalary">₹0</p>
+      </div>
+      <div class="card fade-in-delay-3">
+        <h3>Monthly Summary</h3>
+        <p id="monthlySummary">₹0</p>
+      </div>
+    </section>
+
+    <section class="narrative-section fade-in-delay-2">
+      <h2>AI Financial Narrative</h2>
+      <p id="financialNarrative">Loading...</p>
+    </section>
+
+    <section class="charts-section fade-in-delay-3">
+      <div class="chart-card">
+        <h3>Category-wise Expenses</h3>
+        <canvas id="categoryChart"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

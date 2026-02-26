@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Budget Planner - Expense Tracker</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="../libs/chart.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Smart Budget Planner</h1>
+        <a href="index.html" class="btn">Dashboard</a>
+    </header>
+
+    <main>
+        <section class="ai-budget">
+            <h3>AI Suggested Budget</h3>
+            <div id="budgetNarrative">Loading...</div>
+            <canvas id="budgetChart" width="400" height="200"></canvas>
+        </section>
+    </main>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/charts.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        BudgetPlannerPage.load();
+    </script>
+</body>
+</html>

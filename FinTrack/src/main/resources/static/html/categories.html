@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FinTrack | Categories</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <a href="dashboard.html" class="brand">FinTrack</a>
+    <nav>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="expenses.html">Expenses</a>
+      <a href="budget.html">Budget</a>
+      <a href="health.html">Health</a>
+      <a href="risk.html">Risk</a>
+      <a href="categories.html" class="active">Categories</a>
+      <a href="profile.html">Profile</a>
+      <button id="logoutBtn" class="btn logout-btn">Logout</button>
+    </nav>
+  </header>
+
+  <main class="fade-in">
+    <section>
+      <h2>Manage Categories</h2>
+      <div id="categoryMsg" class="msg mb-2"></div>
+      <div class="form-row mb-2">
+        <div class="form-group" style="margin:0; flex:1;">
+          <input type="text" id="newCategory" placeholder="New category name">
+        </div>
+        <button class="btn" id="btnAdd">Add Category</button>
+      </div>
+      <div class="form-group">
+        <input type="text" id="searchCategory" placeholder="Search categories">
+      </div>
+      <h3 class="text-muted" style="font-size:0.95rem; margin-bottom:0.75rem;">All Categories</h3>
+      <div class="category-list" id="categoryList"></div>
+    </section>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/categories.js"></script>
+</body>
+</html>

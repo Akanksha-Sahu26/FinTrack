@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Financial Health - Expense Tracker</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Financial Health Score</h1>
+        <a href="index.html" class="btn">Dashboard</a>
+    </header>
+
+    <main class="health-container">
+        <section>
+            <h3>Health Score</h3>
+            <p id="healthScore">Loading...</p>
+            <h3>Level</h3>
+            <p id="healthLevel">-</p>
+            <h3>Explanation</h3>
+            <p id="healthExplanation">-</p>
+        </section>
+    </main>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/app.js"></script>
+    <script>
+        HealthPage.load();
+    </script>
+</body>
+</html>

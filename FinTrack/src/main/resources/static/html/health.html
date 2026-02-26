@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FinTrack | Financial Health</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <a href="dashboard.html" class="brand">FinTrack</a>
+    <nav>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="expenses.html">Expenses</a>
+      <a href="budget.html">Budget</a>
+      <a href="health.html" class="active">Health</a>
+      <a href="risk.html">Risk</a>
+      <a href="categories.html">Categories</a>
+      <a href="profile.html">Profile</a>
+      <button id="logoutBtn" class="btn logout-btn">Logout</button>
+    </nav>
+  </header>
+
+  <main class="fade-in">
+    <section class="health-section">
+      <h2>Financial Health Score</h2>
+      <div class="month-picker">
+        <input type="number" id="year" placeholder="Year" min="2020" max="2030">
+        <input type="number" id="month" placeholder="Month (1-12)" min="1" max="12">
+        <button class="btn" id="btnLoad">Load</button>
+      </div>
+      <div class="health-card">
+        <h3>Your Score</h3>
+        <p class="health-score-display" id="healthScore">0</p>
+        <p class="health-level" id="healthLevel">-</p>
+        <p id="healthExplanation">Loading...</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/health.js"></script>
+</body>
+</html>

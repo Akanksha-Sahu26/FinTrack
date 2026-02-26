@@ -1,0 +1,12 @@
+content_assist_autoactivation_triggers_java=.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_
+content_assist_lru_history=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?><history maxLHS\="100" maxRHS\="10"><lhs name\="com.example.demo.entity.User"><rhs name\="com.example.demo.entity.User"/></lhs><lhs name\="com.example.demo.dto.UserResponseDTO"><rhs name\="com.example.demo.dto.UserResponseDTO"/></lhs><lhs name\="java.util.SequencedCollection"><rhs name\="java.util.ArrayList"/></lhs><lhs name\="java.util.Collection"><rhs name\="java.util.ArrayList"/></lhs><lhs name\="java.lang.Iterable"><rhs name\="java.util.ArrayList"/></lhs><lhs name\="java.util.List"><rhs name\="java.util.ArrayList"/></lhs><lhs name\="com.example.demo.dto.CategoryResponseDTO"><rhs name\="com.example.demo.dto.CategoryResponseDTO"/></lhs><lhs name\="org.springframework.http.HttpEntity"><rhs name\="org.springframework.http.ResponseEntity"/></lhs><lhs name\="org.springframework.http.ResponseEntity"><rhs name\="org.springframework.http.ResponseEntity"/></lhs><lhs name\="com.example.demo.dto.ExpenseResponseDTO"><rhs name\="com.example.demo.dto.ExpenseResponseDTO"/></lhs><lhs name\="com.example.demo.entity.Expense"><rhs name\="com.example.demo.entity.Expense"/></lhs><lhs name\="java.time.temporal.Temporal"><rhs name\="java.time.LocalDate"/></lhs><lhs name\="java.time.temporal.TemporalAccessor"><rhs name\="java.time.LocalDate"/></lhs><lhs name\="java.time.temporal.TemporalAdjuster"><rhs name\="java.time.LocalDate"/></lhs><lhs name\="java.time.chrono.ChronoLocalDate"><rhs name\="java.time.LocalDate"/></lhs><lhs name\="com.example.demo.dto.RiskDetectionResponseDTO"><rhs name\="com.example.demo.dto.RiskDetectionResponseDTO"/></lhs><lhs name\="com.example.demo.dto.FinancialNarrativeResponseDTO"><rhs name\="com.example.demo.dto.FinancialNarrativeResponseDTO"/></lhs></history>
+content_assist_number_of_computers=14
+content_assist_proposals_background=255,255,255
+content_assist_proposals_foreground=0,0,0
+eclipse.preferences.version=1
+org.eclipse.jdt.ui.formatterprofiles.version=23
+sourceHoverBackgroundColor=255,255,225
+spelling_locale_initialized=true
+typefilter_migrated_2=true
+useAnnotationsPrefPage=true
+useQuickDiffPrefPage=true

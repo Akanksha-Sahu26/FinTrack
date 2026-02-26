@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FinTrack | Smart Expense Tracker</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="auth-container fade-in">
+    <h1 class="brand">FinTrack</h1>
+    <p class="text-muted" style="margin-bottom: 2rem;">Your intelligent financial companion</p>
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
+      <a href="login.html" class="btn">Login</a>
+      <a href="register.html" class="btn btn-accent">Register</a>
+    </div>
+  </div>
+  <script src="/js/api.js"></script>
+  <script>
+    (async () => {
+      try {
+        const user = await AuthAPI.getCurrentUser();
+        if (user && user.id) window.location.href = 'dashboard.html';
+      } catch {}
+    })();
+  </script>
+</body>
+</html>

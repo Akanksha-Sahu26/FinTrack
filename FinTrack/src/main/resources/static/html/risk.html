@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FinTrack | Risk Detection</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header>
+    <a href="dashboard.html" class="brand">FinTrack</a>
+    <nav>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="expenses.html">Expenses</a>
+      <a href="budget.html">Budget</a>
+      <a href="health.html">Health</a>
+      <a href="risk.html" class="active">Risk</a>
+      <a href="categories.html">Categories</a>
+      <a href="profile.html">Profile</a>
+      <button id="logoutBtn" class="btn logout-btn">Logout</button>
+    </nav>
+  </header>
+
+  <main class="fade-in">
+    <section>
+      <h2>AI Risk Detection</h2>
+      <div class="month-picker">
+        <input type="number" id="year" placeholder="Year" min="2020" max="2030">
+        <input type="number" id="month" placeholder="Month (1-12)" min="1" max="12">
+        <button class="btn" id="btnLoad">Load</button>
+      </div>
+      <div class="risk-grid">
+        <div class="risk-card risky">
+          <h4>Risky Categories (&gt;40% of spending)</h4>
+          <ul id="riskyList"></ul>
+        </div>
+        <div class="risk-card safe">
+          <h4>Safe Categories</h4>
+          <ul id="safeList"></ul>
+        </div>
+      </div>
+      <div class="narrative-section">
+        <h3>Risk Analysis</h3>
+        <p id="riskNarrative">Loading...</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/risk.js"></script>
+</body>
+</html>

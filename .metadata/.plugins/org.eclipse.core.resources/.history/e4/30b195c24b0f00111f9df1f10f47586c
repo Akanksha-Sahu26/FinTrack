@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FinTrack | Login</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="auth-container fade-in">
+        <h1 class="brand">FinTrack</h1>
+        <form id="loginForm">
+            <input type="email" placeholder="Email" name="email" required>
+            <input type="password" placeholder="Password" name="password" required>
+            <button type="submit" class="btn">Login</button>
+            <p class="redirect">Don't have an account? <a href="register.html">Register</a></p>
+        </form>
+        <div id="loginMsg" class="msg"></div>
+    </div>
+    <script src="/js/api.js"></script>
+</body>
+</html>

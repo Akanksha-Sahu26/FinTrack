@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FinTrack | Register</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="auth-container fade-in">
+    <h1 class="brand">FinTrack</h1>
+    <form id="registerForm">
+      <div class="form-group">
+        <input type="text" name="name" placeholder="Full Name" required autocomplete="name">
+      </div>
+      <div class="form-group">
+        <input type="email" name="email" placeholder="Email" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <input type="password" name="password" placeholder="Password" required autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <input type="number" name="salary" placeholder="Monthly Income (₹)" required min="1" step="0.01" autocomplete="off">
+      </div>
+      <button type="submit" class="btn" style="width: 100%;">Register</button>
+    </form>
+    <p class="redirect">Already have an account? <a href="login.html">Login</a></p>
+    <div id="registerMsg" class="msg"></div>
+  </div>
+  <script src="/js/api.js"></script>
+  <script>
+    const form = document.getElementById('registerForm');
+    const msg = document.getElementById('registerMsg');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.textContent = '';
+      msg.className = 'msg';
+      try {
+        const data = {
+          name: form.name.value.trim(),
+          email: form.email.value.trim(),
+          password: form.password.value,
+          salary: parseFloat(form.salary.value)
+        };
+        await AuthAPI.register(data);
+        window.location.href = 'login.html';
+      } catch (err) {
+        msg.textContent = err.message || 'Registration failed';
+        msg.className = 'msg error';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+package com.example.demo.service;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.stereotype.Service;
+
+import com.example.demo.dto.ExpenseResponseDTO;
+import com.example.demo.dto.FinancialNarrativeResponseDTO;
+import com.example.demo.exception.ResourceNotFoundException;
+
+import tools.jackson.databind.ObjectMapper;
+
+@Service
+public class AIService {
+	 private final ExpenseService expenseService;
+	 private final ChatClient chatClient;
+	public AIService(ExpenseService expenseService, ChatClient chatClient) {
+		super();
+		this.expenseService = expenseService;
+		this.chatClient = chatClient;
+	}
+	public FinancialNarrativeResponseDTO generateFinancialNarrative(Long userId,
+            int year,
+            int month) {
+
+// 1️ Fetch all expenses for that month
+    List<ExpenseResponseDTO> expenses =
+    expenseService.getExpensesByMonth(userId, year, month);
+
+     if (expenses.isEmpty()) {
+     throw new ResourceNotFoundException("No expenses found for this month");
+     }
+
+// 2️ Get total monthly spending
+     BigDecimal totalSpending =
+     expenseService.getMonthlySummary(userId);
+
+// 3️ Group by category and calculate totals
+   Map<String, BigDecimal> categoryTotals = new HashMap<>();
+
+   for (ExpenseResponseDTO exp : expenses) {
+
+   String categoryName = exp.getCategory().getName();
+   BigDecimal amount = exp.getAmt();
+   categoryTotals.put(
+   categoryName,
+   categoryTotals.getOrDefault(categoryName, BigDecimal.ZERO)
+   .add(amount)
+);
+}
+
+// 4️ Find highest and lowest spending categories
+String highestCategory = null;
+String lowestCategory = null;
+
+BigDecimal highestAmount = BigDecimal.ZERO;
+BigDecimal lowestAmount = null;
+
+for (Map.Entry<String, BigDecimal> entry : categoryTotals.entrySet()) {
+
+if (highestCategory == null ||
+entry.getValue().compareTo(highestAmount) > 0) {
+
+highestCategory = entry.getKey();
+highestAmount = entry.getValue();
+}
+
+if (lowestAmount == null ||
+entry.getValue().compareTo(lowestAmount) < 0) {
+
+lowestCategory = entry.getKey();
+lowestAmount = entry.getValue();
+}
+}
+
+// 5️⃣ Prepare structured input for AI
+String prompt = """
+You are a financial assistant.
+
+Generate a financial narrative in JSON format only.
+
+Total Spending: %s
+Category Breakdown: %s
+Highest Spending Category: %s
+Lowest Spending Category: %s
+
+Return strictly in this format:
+
+{
+"totalSpending": "...",
+"highestCategory": "...",
+"lowestCategory": "...",
+"narrative": "..."
+}
+""".formatted(
+totalSpending,
+categoryTotals.toString(),
+highestCategory,
+lowestCategory
+);
+//6️ Call AI using ChatClient
+String aiResponse = chatClient.prompt()
+     .system("""
+         You are a financial assistant.
+         Always return strictly valid JSON.
+         Do not add explanations outside JSON.
+     """)
+     .user(prompt)
+     .call()
+     .content();
+
+//7️ Convert AI JSON response into DTO
+ObjectMapper mapper = new ObjectMapper();
+try {
+ return mapper.readValue(aiResponse, FinancialNarrativeResponseDTO.class);
+} catch (Exception e) {
+ throw new RuntimeException("Failed to parse AI response", e);
+}
+ 
+
+	}
+}

@@ -1,0 +1,101 @@
+package com.example.demo.controller;
+
+import java.time.LocalDate;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.demo.dto.BudgetPlannerResponseDTO;
+import com.example.demo.dto.FinancialHealthCareResponseDTO;
+import com.example.demo.dto.FinancialNarrativeResponseDTO;
+import com.example.demo.dto.RiskDetectionResponseDTO;
+import com.example.demo.service.AIService;
+
+import jakarta.servlet.http.HttpSession;
+
+@RestController
+@RequestMapping("/api/ai")
+public class AIController {
+	private final AIService aiService;
+    
+	@Autowired
+    public AIController(AIService aiService) {
+        this.aiService = aiService;
+    }
+	
+	@GetMapping("/financial-narrative")
+    public ResponseEntity<FinancialNarrativeResponseDTO> getFinancialNarrative(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month,
+            HttpSession session) {
+
+        Long userId=(Long)session.getAttribute("userId");
+        LocalDate currentDate = LocalDate.now();
+
+        int finalYear = (year != null) ? year : currentDate.getYear();
+        int finalMonth = (month != null) ? month : currentDate.getMonthValue();
+
+        FinancialNarrativeResponseDTO response =
+                aiService.generateFinancialNarrative(userId, finalYear, finalMonth);
+
+        return ResponseEntity.ok(response);
+    }
+    
+	
+	@GetMapping("/risk-detection")
+    public ResponseEntity<RiskDetectionResponseDTO> getRiskDetection(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month,
+            HttpSession session) {
+
+        Long userId=(Long)session.getAttribute("userId");
+        LocalDate currentDate = LocalDate.now();
+
+        int finalYear = (year != null) ? year : currentDate.getYear();
+        int finalMonth = (month != null) ? month : currentDate.getMonthValue();
+
+        RiskDetectionResponseDTO response=aiService.categoryWiseRiskDetection(userId, finalYear, finalMonth);
+
+        return ResponseEntity.ok(response);
+    }
+	
+	@GetMapping("/budget-planner")
+    public ResponseEntity<BudgetPlannerResponseDTO> getBudgetPlanning(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month,
+            HttpSession session) {
+
+        Long userId=(Long)session.getAttribute("userId");
+        LocalDate currentDate = LocalDate.now();
+
+        int finalYear = (year != null) ? year : currentDate.getYear();
+        int finalMonth = (month != null) ? month : currentDate.getMonthValue();
+
+        BudgetPlannerResponseDTO response=aiService.smartBudgetPlanner(userId, finalYear, finalMonth);
+
+        return ResponseEntity.ok(response);
+    }
+	
+	@GetMapping("/health-score")
+    public ResponseEntity<FinancialHealthCareResponseDTO> getfinancialHealthScore(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month,
+            HttpSession session) {
+
+        Long userId=(Long)session.getAttribute("userId");
+        LocalDate currentDate = LocalDate.now();
+
+        int finalYear = (year != null) ? year : currentDate.getYear();
+        int finalMonth = (month != null) ? month : currentDate.getMonthValue();
+
+        FinancialHealthCareResponseDTO response=aiService.aiFinancialHealthScore(userId, finalYear, finalMonth);
+
+        return ResponseEntity.ok(response);
+    }
+
+}

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FinTrack | Budget Planner</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <a href="dashboard.html" class="brand">FinTrack</a>
+    <nav>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="expenses.html">Expenses</a>
+      <a href="budget.html" class="active">Budget</a>
+      <a href="health.html">Health</a>
+      <a href="risk.html">Risk</a>
+      <a href="categories.html">Categories</a>
+      <a href="profile.html">Profile</a>
+      <button id="logoutBtn" class="btn logout-btn">Logout</button>
+    </nav>
+  </header>
+
+  <main class="fade-in">
+    <section class="budget-container">
+      <h2>Smart Budget Planner</h2>
+      <div class="month-picker">
+        <input type="number" id="year" placeholder="Year" min="2020" max="2030">
+        <input type="number" id="month" placeholder="Month (1-12)" min="1" max="12">
+        <button class="btn" id="btnLoad">Load</button>
+      </div>
+      <div class="narrative-section">
+        <p id="budgetNarrative">Loading budget recommendations...</p>
+      </div>
+      <div class="charts-section">
+        <div class="chart-card">
+          <h3>Current Category Allocation</h3>
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/budget.js"></script>
+</body>
+</html>
